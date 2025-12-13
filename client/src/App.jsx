@@ -1,43 +1,45 @@
 import { ApolloClient, HttpLink, InMemoryCache, gql } from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
+import { useQuery } from "@apollo/client/react";
 import './App.css'
 
-const client = new ApolloClient({
-  link: new HttpLink({ uri: "http://localhost:8000/graphql" }),
-  cache: new InMemoryCache(),
-});
 
 
-// const client = ...
-
-client
-  .query({
-    query: gql`
-      query GetTodos {
-        getTodos {
-          id
-          title
-          completed
-          user {
-            name
-            email
-            phone
-        }
-       }
+const GET_TODOS = gql`
+  query GetTodos {
+    getTodos {
+      id
+      title
+      completed
+      user {
+        name
+        email
+        phone
       }
-    `,
-  })
-  .then((result) => console.log(result));
-
+    }
+  }
+`;
 
 
 
 function App() {
   
+ const { loading, error, data } = useQuery(GET_TODOS);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error {error.message} 😢</p>;
 
   return (
-  <ApolloProvider client={client}></ApolloProvider>
-  )
+    <div>
+      {data.getTodos.map(todo => (
+        <div key={todo.id}>
+          <h3>{todo.title}</h3>
+          <p>{todo.user.name}</p>
+        </div>
+      ))}
+    </div>
+  );
+ 
 }
 
 export default App
